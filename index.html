@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PromptSite AI - Official Owner Version</title>
+    <style>
+        /* ... (Vahi purana stylish design yahan rahega) ... */
+    </style>
+</head>
+<body>
+    <div id="navbar">...</div>
+    <div class="hero">
+        <input type="text" id="user-prompt" placeholder="A luxury hotel website...">
+        <button onclick="generateRealSite()">Generate Website</button>
+    </div>
+
+    <script>
+        async function generateRealSite() {
+            const prompt = document.getElementById('user-prompt').value;
+            const loadingText = document.getElementById('loading-text');
+            
+            // Step 1: Loading Start
+            document.getElementById('ai-loader').style.display = 'flex';
+            
+            try {
+                // Step 2: OpenAI ko message bhejna (Via Vercel Server)
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const data = await response.json();
+                
+                // Step 3: Result dikhana
+                const frame = document.getElementById('preview-frame');
+                frame.srcdoc = data.html; // AI wala code yahan dikhega
+                frame.style.display = 'block';
+                document.getElementById('ai-loader').style.display = 'none';
+
+            } catch (err) {
+                alert("Error: Server connect nahi ho pa raha. Vercel par deploy karein!");
+            }
+        }
+    </script>
+</body>
+</html>
