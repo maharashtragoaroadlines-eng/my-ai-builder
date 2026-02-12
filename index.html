@@ -2,43 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PromptSite AI - Official Owner Version</title>
-    <style>
-        /* ... (Vahi purana stylish design yahan rahega) ... */
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahil AI Website Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div id="navbar">...</div>
-    <div class="hero">
-        <input type="text" id="user-prompt" placeholder="A luxury hotel website...">
-        <button onclick="generateRealSite()">Generate Website</button>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="max-w-2xl w-full text-center space-y-8">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+            AI Website Builder
+        </h1>
+        <p class="text-slate-400">What kind of website do you want to build today?</p>
+        
+        <div class="flex flex-col gap-4">
+            <textarea id="prompt" class="p-4 rounded-xl bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none text-white h-32" placeholder="Example: A dark themed portfolio for a photographer..."></textarea>
+            <button onclick="generate()" id="btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                Generate Website
+            </button>
+        </div>
+
+        <div id="output" class="hidden mt-8 p-6 bg-slate-800 rounded-xl border border-slate-700 text-left">
+            <h2 class="text-xl mb-4 font-bold text-emerald-400">Your Website Code is Ready!</h2>
+            <pre id="code" class="text-xs overflow-x-auto p-4 bg-black rounded border border-slate-800 text-emerald-500"></pre>
+        </div>
     </div>
 
     <script>
-        async function generateRealSite() {
-            const prompt = document.getElementById('user-prompt').value;
-            const loadingText = document.getElementById('loading-text');
-            
-            // Step 1: Loading Start
-            document.getElementById('ai-loader').style.display = 'flex';
-            
+        async function generate() {
+            const prompt = document.getElementById('prompt').value;
+            const btn = document.getElementById('btn');
+            const output = document.getElementById('output');
+            const codeBox = document.getElementById('code');
+
+            if(!prompt) return alert("Please enter a prompt!");
+
+            btn.innerText = "Generating... Please wait";
+            btn.disabled = true;
+
             try {
-                // Step 2: OpenAI ko message bhejna (Via Vercel Server)
-                const response = await fetch('/api/generate', {
+                // Netlify functions ke liye sahi path
+                const res = await fetch('/.netlify/functions/generate', {
                     method: 'POST',
-                    body: JSON.stringify({ prompt: prompt })
+                    body: JSON.stringify({ prompt })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 
-                // Step 3: Result dikhana
-                const frame = document.getElementById('preview-frame');
-                frame.srcdoc = data.html; // AI wala code yahan dikhega
-                frame.style.display = 'block';
-                document.getElementById('ai-loader').style.display = 'none';
-
+                output.classList.remove('hidden');
+                codeBox.innerText = data.html;
+                btn.innerText = "Generate Website";
+                btn.disabled = false;
             } catch (err) {
-                alert("Error: Server connect nahi ho pa raha. Vercel par deploy karein!");
+                alert("Error: " + err.message);
+                btn.innerText = "Generate Website";
+                btn.disabled = false;
             }
         }
     </script>
