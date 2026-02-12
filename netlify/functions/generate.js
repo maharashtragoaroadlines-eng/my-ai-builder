@@ -1,31 +1,34 @@
-import OpenAI from "openai";
+const OpenAI = require("openai");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+exports.handler = async function(event, context) {
+  // Sirf POST request allow karein
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    const { prompt } = JSON.parse(req.body);
+    const { prompt } = JSON.parse(event.body);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // Ya jo bhi model aap use karna chahein
+      model: "gpt-3.5-turbo", // Ye fast aur sasta hai testing ke liye
       messages: [
-        { 
-          role: "system", 
-          content: "You are a world-class web developer. Return ONLY full, valid HTML code with Tailwind CSS. Do not include any markdown formatting like ```html. Start with <!DOCTYPE html>." 
-        },
-        { role: "user", content: `Create a professional website for: ${prompt}` }
+        { role: "system", content: "You are a web developer. Return ONLY the HTML code for the website requested. No explanation." },
+        { role: "user", content: prompt }
       ],
     });
 
-    res.status(200).json({ html: response.choices[0].message.content });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ html: response.choices[0].message.content }),
+    };
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    };
   }
-}
+};
